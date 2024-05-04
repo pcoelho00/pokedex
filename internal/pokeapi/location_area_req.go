@@ -7,6 +7,15 @@ import (
 	"net/http"
 )
 
+func UnmarshalAreaNames(dat []byte) (LocationAreaNames, error) {
+	locationAreaNames := LocationAreaNames{}
+	err := json.Unmarshal(dat, &locationAreaNames)
+	if err != nil {
+		return LocationAreaNames{}, err
+	}
+	return locationAreaNames, nil
+}
+
 func (c *Client) ListLocationAreas(pageURL *string) (LocationAreaNames, error) {
 	var fullURL string
 	if pageURL != nil {
@@ -14,6 +23,11 @@ func (c *Client) ListLocationAreas(pageURL *string) (LocationAreaNames, error) {
 	} else {
 		endpoint := "/location-area"
 		fullURL = baseURL + endpoint
+	}
+
+	dat, ok := c.cache.Get(fullURL)
+	if ok {
+		return UnmarshalAreaNames(dat)
 	}
 
 	req, err := http.NewRequest("GET", fullURL, nil)
@@ -30,16 +44,17 @@ func (c *Client) ListLocationAreas(pageURL *string) (LocationAreaNames, error) {
 		return LocationAreaNames{}, fmt.Errorf("bad status code: %v", resp.StatusCode)
 	}
 
-	dat, err := io.ReadAll(resp.Body)
+	dat, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return LocationAreaNames{}, err
 	}
 
-	locationAreaNames := LocationAreaNames{}
-	err = json.Unmarshal(dat, &locationAreaNames)
+	locationAreaNames, err := UnmarshalAreaNames(dat)
 	if err != nil {
 		return LocationAreaNames{}, err
 	}
+
+	c.cache.Add(fullURL, dat)
 
 	return locationAreaNames, nil
 }

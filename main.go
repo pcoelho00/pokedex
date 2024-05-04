@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/pcoelho00/pokedex/internal/pokeapi"
 )
@@ -15,7 +16,7 @@ type config struct {
 func main() {
 
 	cfg := config{
-		pokeapiClient: pokeapi.NewClient(),
+		pokeapiClient: pokeapi.NewClient(time.Hour),
 	}
 
 	fmt.Println("Starting loop:")
