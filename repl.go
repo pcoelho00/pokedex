@@ -10,7 +10,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	// callback    func() error
+	callback    func() error
 }
 
 func createNewCommands() map[string]cliCommand {
@@ -18,12 +18,12 @@ func createNewCommands() map[string]cliCommand {
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
-			// callback:    commandHelp,
+			callback:    commandHelp,
 		},
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
-			// callback:    commandExit,
+			callback:    commandExit,
 		},
 	}
 }
@@ -45,21 +45,16 @@ func startRepl() {
 			continue
 		}
 
-		command := text[0]
+		commandName := text[0]
 
 		commands := createNewCommands()
 
-		switch command {
-		case "help":
-			fmt.Println("Available Commands:")
-			for name := range commands {
-				fmt.Println(" - ", name)
-			}
-
-		case "exit":
-			os.Exit(0)
-		default:
-			fmt.Println("echo: ", text)
+		command, ok := commands[commandName]
+		if !ok {
+			fmt.Println("Invalid command: ", commandName)
+			continue
 		}
+
+		command.callback()
 	}
 }
