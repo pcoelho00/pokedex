@@ -10,7 +10,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func createNewCommands() map[string]cliCommand {
@@ -35,6 +35,11 @@ func createNewCommands() map[string]cliCommand {
 			description: "List the previous Location Areas",
 			callback:    commandMapPrevious,
 		},
+		"explore": {
+			name:        "explore",
+			description: "List the pokemion in the Area",
+			callback:    commandGetArea,
+		},
 	}
 }
 
@@ -50,12 +55,16 @@ func startRepl(cfg *config) {
 
 	reader := bufio.NewScanner(os.Stdin)
 	for reader.Scan() {
-		text := cleanInput(reader.Text())
-		if len(text) == 0 {
+		input := cleanInput(reader.Text())
+		if len(input) == 0 {
 			continue
 		}
 
-		commandName := text[0]
+		commandName := input[0]
+		args := []string{}
+		if len(input) > 1 {
+			args = input[1:]
+		}
 
 		commands := createNewCommands()
 
@@ -65,7 +74,7 @@ func startRepl(cfg *config) {
 			continue
 		}
 
-		err := command.callback(cfg)
+		err := command.callback(cfg, args...)
 		if err != nil {
 			fmt.Println(err)
 		}

@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func commandHelp(cfg *config) error {
+func commandHelp(cfg *config, args ...string) error {
 	fmt.Println("Available Commands:")
 	commands := createNewCommands()
 	for _, cmd := range commands {
@@ -15,13 +15,13 @@ func commandHelp(cfg *config) error {
 	return nil
 }
 
-func commandExit(cfg *config) error {
+func commandExit(cfg *config, args ...string) error {
 	fmt.Println("Exiting program")
 	os.Exit(0)
 	return nil
 }
 
-func commandMapNext(cfg *config) error {
+func commandMapNext(cfg *config, args ...string) error {
 	resp, err := cfg.pokeapiClient.ListLocationAreas(cfg.nextLocationURL)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func commandMapNext(cfg *config) error {
 	return nil
 }
 
-func commandMapPrevious(cfg *config) error {
+func commandMapPrevious(cfg *config, args ...string) error {
 	if cfg.previousLocationURL == nil {
 		return errors.New("you are on the first page")
 	}
@@ -56,5 +56,24 @@ func commandMapPrevious(cfg *config) error {
 
 	cfg.nextLocationURL = resp.Next
 	cfg.previousLocationURL = resp.Previous
+	return nil
+}
+
+func commandGetArea(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("no location provided")
+	}
+
+	locationAreaName := args[0]
+	locationArea, err := cfg.pokeapiClient.GetLocationArea(locationAreaName)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Pokemon in %s:\n", locationArea.Name)
+	for _, pokemon := range locationArea.PokemonEncounters {
+		fmt.Printf(" - %s\n", pokemon.Pokemon.Name)
+	}
+
 	return nil
 }

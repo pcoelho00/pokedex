@@ -16,6 +16,15 @@ func UnmarshalAreaNames(dat []byte) (LocationAreaNames, error) {
 	return locationAreaNames, nil
 }
 
+func UnmarshalArea(dat []byte) (LocationArea, error) {
+	locationArea := LocationArea{}
+	err := json.Unmarshal(dat, &locationArea)
+	if err != nil {
+		return LocationArea{}, err
+	}
+	return locationArea, nil
+}
+
 func (c *Client) ListLocationAreas(pageURL *string) (LocationAreaNames, error) {
 	var fullURL string
 	if pageURL != nil {
@@ -57,4 +66,43 @@ func (c *Client) ListLocationAreas(pageURL *string) (LocationAreaNames, error) {
 	c.cache.Add(fullURL, dat)
 
 	return locationAreaNames, nil
+}
+
+func (c *Client) GetLocationArea(AreaName string) (LocationArea, error) {
+	endpoint := "/location-area/" + AreaName
+
+	fullURL := baseURL + endpoint
+
+	dat, ok := c.cache.Get(fullURL)
+	if ok {
+		return UnmarshalArea(dat)
+	}
+
+	req, err := http.NewRequest("GET", fullURL, nil)
+	if err != nil {
+		return LocationArea{}, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return LocationArea{}, err
+	}
+
+	if resp.StatusCode > 399 {
+		return LocationArea{}, fmt.Errorf("bad status code: %v", resp.StatusCode)
+	}
+
+	dat, err = io.ReadAll(resp.Body)
+	if err != nil {
+		return LocationArea{}, err
+	}
+
+	locationArea, err := UnmarshalArea(dat)
+	if err != nil {
+		return LocationArea{}, err
+	}
+
+	c.cache.Add(fullURL, dat)
+
+	return locationArea, nil
 }
