@@ -146,7 +146,22 @@ func (c *Client) GetPokemonInfo(PokemonName string) (PokemonInfo, error) {
 		return PokemonInfo{}, err
 	}
 
-	c.cache.Add(fullUrl, dat)
 	return Pokemon, nil
 
+}
+
+func (c *Client) GetPokeInfoAtArea(AreaName, PokemonName string) (PokemonEncounter, error) {
+
+	locationArea, err := c.GetLocationArea(AreaName)
+	if err != nil {
+		return PokemonEncounter{}, err
+	}
+
+	for _, Pokemon := range locationArea.PokemonEncounters {
+		if Pokemon.Pokemon.Name == PokemonName {
+			return Pokemon, nil
+		}
+	}
+
+	return PokemonEncounter{}, nil
 }
