@@ -31,14 +31,19 @@ func createNewCommands() map[string]cliCommand {
 			callback:    commandMapNext,
 		},
 		"mapb": {
-			name:        "map",
+			name:        "mapb",
 			description: "List the previous Location Areas",
 			callback:    commandMapPrevious,
 		},
 		"explore": {
 			name:        "explore",
-			description: "List the pokemion in the Area",
+			description: "List the pokemon in the Area",
 			callback:    commandGetArea,
+		},
+		"pokestats": {
+			name:        "poke info",
+			description: "Shows the Pokemon Base Stats",
+			callback:    commandPokemonStats,
 		},
 	}
 }

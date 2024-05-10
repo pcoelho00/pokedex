@@ -60,7 +60,7 @@ func commandMapPrevious(cfg *config, args ...string) error {
 }
 
 func commandGetArea(cfg *config, args ...string) error {
-	if len(args) != 1 {
+	if len(args) < 1 {
 		return errors.New("no location provided")
 	}
 
@@ -70,9 +70,30 @@ func commandGetArea(cfg *config, args ...string) error {
 		return err
 	}
 
-	fmt.Printf("Pokemon in %s:\n", locationArea.Name)
+	fmt.Printf("Exploring %s...\n", locationArea.Name)
+	fmt.Printf("Pokemon found in the area:\n")
 	for _, pokemon := range locationArea.PokemonEncounters {
 		fmt.Printf(" - %s\n", pokemon.Pokemon.Name)
+	}
+
+	return nil
+}
+
+func commandPokemonStats(cfg *config, args ...string) error {
+
+	if len(args) < 1 {
+		return errors.New("no pokemon provided")
+	}
+
+	pokemonName := args[0]
+	Pokemon, err := cfg.pokeapiClient.GetPokemonInfo(pokemonName)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Pokemon %s Id %v:\n", Pokemon.Name, Pokemon.ID)
+	for _, pokeinfo := range Pokemon.Stats {
+		fmt.Printf("%s Base: %v\n", pokeinfo.Stat.Name, pokeinfo.BaseStat)
 	}
 
 	return nil

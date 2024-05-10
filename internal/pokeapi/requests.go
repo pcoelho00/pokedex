@@ -25,6 +25,16 @@ func UnmarshalArea(dat []byte) (LocationArea, error) {
 	return locationArea, nil
 }
 
+func UnmarshalPokemon(dat []byte) (PokemonInfo, error) {
+	Pokemon := PokemonInfo{}
+	err := json.Unmarshal(dat, &Pokemon)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+	return Pokemon, nil
+
+}
+
 func (c *Client) ListLocationAreas(pageURL *string) (LocationAreaNames, error) {
 	var fullURL string
 	if pageURL != nil {
@@ -105,4 +115,38 @@ func (c *Client) GetLocationArea(AreaName string) (LocationArea, error) {
 	c.cache.Add(fullURL, dat)
 
 	return locationArea, nil
+}
+
+func (c *Client) GetPokemonInfo(PokemonName string) (PokemonInfo, error) {
+
+	endpoint := "/pokemon/" + PokemonName
+	fullUrl := baseURL + endpoint
+
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+
+	if resp.StatusCode > 399 {
+		return PokemonInfo{}, fmt.Errorf("bad status code: %v", resp.StatusCode)
+	}
+
+	dat, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+
+	Pokemon, err := UnmarshalPokemon(dat)
+	if err != nil {
+		return PokemonInfo{}, err
+	}
+
+	c.cache.Add(fullUrl, dat)
+	return Pokemon, nil
+
 }
