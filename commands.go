@@ -149,7 +149,21 @@ func commandCatchPokemon(cfg *config, args ...string) error {
 	}
 
 	fmt.Printf("%s was caught!\n", pokemonName)
-	cfg.Pokedex[pokemonName] = pokemon
+	cfg.Pokedex[pokemon.Name] = pokemon
+
+	return nil
+
+}
+
+func commandPokedex(cfg *config, args ...string) error {
+
+	if len(cfg.Pokedex) == 0 {
+		return errors.New("no entries on the pokedex")
+	}
+
+	for name, pokemon := range cfg.Pokedex {
+		fmt.Printf("%v: %s\n", pokemon.ID, name)
+	}
 
 	return nil
 

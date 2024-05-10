@@ -50,6 +50,11 @@ func createNewCommands() map[string]cliCommand {
 			description: "Shows the Pokemon Base Stats",
 			callback:    commandCatchPokemon,
 		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Shows the Pokemon Base Stats",
+			callback:    commandPokedex,
+		},
 	}
 }
 
